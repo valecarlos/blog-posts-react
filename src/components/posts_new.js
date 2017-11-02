@@ -1,29 +1,37 @@
 import React, { Component } from 'react'
 import { Field, reduxForm } from 'redux-form'
-
+import { Link } from 'react-router-dom'
+import { connect } from 'react-redux'
+import { createPost } from '../actions'
 class PostsNew extends Component {
+    
     renderField(field) {
+        const { meta: { touched, error} } = field
+        const className = `form-group ${ touched && error ? 'has-danger' : ''}`
+
         //we receive field so we can link this function with the Field component
         return(
-            <div className="form-group">
+            <div className={className}>
                 <label>{field.label}</label>
                 <input 
                     className="form-control"
                     type="text"
                     {...field.input}
                 />
-                {field.meta.error}
+                <div className="text-help">
+                    {touched ? error : ''}
+                </div>
             </div>
         )
     }
 
     onSubmit(values) {
-        console.log(values)
+        this.props.createPost(values)
     }
 
     render() {
-        const { handleSubmit } = this.props;
-
+        const { handleSubmit } = this.props; // this is comming from the wiring up between reduxForm we are doing at the end of the file
+        //handle submit takes in a function - that we have defined - and if everything is fine with validations and stuff, then our function is run, we bind it because we want - to be this component
         return (
             <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
                 <Field 
@@ -44,6 +52,7 @@ class PostsNew extends Component {
                 <button type="submit" className="btn btn-primary">
                     Submit
                 </button>
+                <Link to="/" className="btn btn-danger">Cancel</Link>
             </form>
         )
     }
@@ -70,4 +79,6 @@ function validate(values){
 export default reduxForm({
     validate,
     form: 'PostsNewForm'
-})(PostsNew)
+})(
+    connect(null, { createPost })(PostsNew)
+) // this syntax is explained on Section 9 lecture 142
